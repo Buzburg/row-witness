@@ -1,0 +1,40 @@
+{
+  "format": "row-witness-recipe",
+  "version": 1,
+  "mappings": [
+    {
+      "before": "customer_id",
+      "after": "account_id",
+      "role": "key"
+    },
+    {
+      "before": "company",
+      "after": "company",
+      "role": "compare"
+    },
+    {
+      "before": "plan",
+      "after": "plan",
+      "role": "compare"
+    },
+    {
+      "before": "seats",
+      "after": "seats",
+      "role": "compare"
+    },
+    {
+      "before": "owner",
+      "after": "account_owner",
+      "role": "compare"
+    },
+    {
+      "before": "monthly_usd",
+      "after": "monthly_usd",
+      "role": "compare"
+    }
+  ],
+  "options": {
+    "trimWhitespace": false,
+    "ignoreCase": false
+  }
+}

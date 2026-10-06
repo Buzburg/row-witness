@@ -1,0 +1,24 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check && npm test && npm run build
+      - run: npx playwright install --with-deps chromium firefox
+      - run: npm run test:e2e
+      - name: Publish the verified standalone app
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/row-witness.html dist/SHA256SUMS.txt --verify-tag --title "Row Witness $GITHUB_REF_NAME" --notes-file docs/RELEASE.md

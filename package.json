@@ -1,0 +1,26 @@
+{
+  "name": "row-witness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Find what changed between two CSV exports. One HTML file. Entirely offline.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "test:e2e": "playwright test",
+    "start": "node scripts/serve.mjs",
+    "demo": "npm run build && node scripts/capture-demo.mjs",
+    "benchmark": "node --expose-gc scripts/benchmark.mjs"
+  },
+  "overrides": { "playwright-core": "1.58.2" },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
+    "@playwright/test": "1.58.2",
+    "@types/node": "22.19.15",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
+  }
+}

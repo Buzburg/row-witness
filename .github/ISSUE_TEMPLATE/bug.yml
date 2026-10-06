@@ -1,0 +1,22 @@
+name: Report a bug
+description: Report a reproducible problem with synthetic data.
+body:
+  - type: markdown
+    attributes:
+      value: Please use invented sample records. Do not attach customer data, private exports or credentials.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps and minimal synthetic CSV examples
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: App version, browser and operating system
