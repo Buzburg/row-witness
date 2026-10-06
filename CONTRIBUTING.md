@@ -11,11 +11,11 @@ npm ci
 npm run check
 npm test
 npm run build
-npx playwright install chromium
+npx playwright install chromium firefox
 npm run test:e2e
 ```
 
-On Linux, Playwright may also need system browser dependencies (`npx playwright install --with-deps chromium`). Use your environment's normal installation and permission process. The single-file application is generated at `dist/row-witness.html`.
+On Linux, Playwright may also need system browser dependencies (`npx playwright install --with-deps chromium firefox`). Use your environment's normal installation and permission process. The single-file application is generated at `dist/row-witness.html`.
 
 ## What to preserve
 

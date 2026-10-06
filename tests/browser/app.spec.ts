@@ -145,8 +145,10 @@ test('a recipe loaded before files does not overwrite later rule choices', async
 });
 
 test('replacing result controls cannot revive an invisible search filter', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+  await page.reload();
   await sample(page);
-  await page.clock.install();
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'));
   await page.getByRole('searchbox').fill('Northstar');
   await page.getByLabel('Trim outer whitespace').check();
   await page.clock.fastForward(300);

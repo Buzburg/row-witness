@@ -88,12 +88,13 @@ npm ci
 npm run check
 npm test
 npm run build
+npx playwright install chromium firefox
 npm run test:e2e
 ```
 
 The build produces `dist/row-witness.html`. Open it directly in your browser. Dependencies are needed to build and test, but the generated application has no runtime downloads. Browser test setup is documented in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-See the [acceptance contract](docs/SPEC.md), [research and existing alternatives](docs/RESEARCH.md), and [security notes](SECURITY.md). Bug reports with small synthetic CSV examples are particularly helpful.
+See the [verification record](docs/VERIFICATION.md), [measured benchmark](docs/BENCHMARK.md), [acceptance contract](docs/SPEC.md), [research and existing alternatives](docs/RESEARCH.md), and [security notes](SECURITY.md). Bug reports with small synthetic CSV examples are particularly helpful.
 
 ## License
 

@@ -6,8 +6,10 @@ const worker = await build({ entryPoints: ['src/worker.ts'], bundle: true, write
 const app = await build({ entryPoints: ['src/main.ts'], bundle: true, write: false, format: 'iife', target: 'es2022', minify: true, define: { __WORKER_SOURCE__: JSON.stringify(worker.outputFiles[0].text) } });
 const js = app.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 const css = await readFile('src/styles.css', 'utf8');
+const license = await readFile('LICENSE', 'utf8');
 const hash = createHash('sha256').update(js).digest('base64');
 const html = `<!doctype html>
+<!-- ${license.replaceAll('--', '- -')} -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
