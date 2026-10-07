@@ -47,6 +47,109 @@ test('sample works offline, accounts for exceptions, and makes no network reques
   expect(errors).toEqual([]);
 });
 
+test('one sample click explains real results, filters them, and lets the guide be dismissed', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => {
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (options?: boolean | ScrollIntoViewOptions): void {
+      if (this.id === 'results' && typeof options === 'object') this.setAttribute('data-test-scroll', options.behavior ?? 'auto');
+      original.call(this, options);
+    };
+  });
+  await sample(page);
+  const guide = page.getByRole('complementary', { name: 'Start here: a fictional customer list' });
+  await expect(guide).toBeVisible();
+  await expect(guide).toContainText('Synthetic sample. No customer data.');
+  await expect(guide.getByRole('heading', { level: 3 })).toBeFocused();
+  await expect(page.locator('#results')).toHaveAttribute('data-test-scroll', 'auto');
+  await guide.getByRole('button', { name: 'See 4 changed groups' }).click();
+  await expect(page.locator('.results-table tbody > tr:not([hidden])')).toHaveCount(4);
+  await page.getByRole('button', { name: 'Inspect record 00102', exact: true }).click();
+  await expect(page.locator('.original-grid')).toContainText('Starter');
+  await expect(page.locator('.original-grid')).toContainText('60.00');
+  await guide.getByRole('button', { name: 'See 6 unchanged groups' }).click();
+  await expect(page.locator('.results-table tbody > tr:not([hidden])')).toHaveCount(6);
+  await expect(page.locator('.results-table')).toContainText('Northstar');
+  await guide.getByRole('button', { name: 'Review 3 ambiguous groups' }).click();
+  await expect(page.locator('.results-table tbody > tr:not([hidden])')).toHaveCount(3);
+  await guide.getByRole('button', { name: 'Dismiss guide' }).click();
+  await expect(guide).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'See the difference', exact: true })).toBeFocused();
+  await expect(page.locator('.stat-changed .stat-value')).toHaveText('4');
+  await expect(page.getByRole('button', { name: '↓ Full JSON', exact: true })).toBeEnabled();
+});
+
+test('sample guidance disappears after rules, mappings, a new comparison, or reset', async ({ page }) => {
+  await sample(page);
+  await page.getByLabel('Trim outer whitespace').check();
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '↓ Full JSON', exact: true })).toBeDisabled();
+  await compare(page);
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await sample(page);
+  await page.getByLabel('Remove column pair 2', { exact: true }).click();
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await sample(page);
+  await compare(page);
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await sample(page);
+  await page.getByRole('button', { name: 'Clear all', exact: true }).click();
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await expect(page.locator('.stat-card')).toHaveCount(0);
+});
+
+test('a delayed manual file import clears sample claims before the file finishes reading', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = File.prototype.arrayBuffer;
+    File.prototype.arrayBuffer = async function (): Promise<ArrayBuffer> {
+      if (this.name === 'my-before.csv') await new Promise(resolve => window.setTimeout(resolve, 500));
+      return original.call(this);
+    };
+  });
+  await page.reload();
+  await sample(page);
+  await upload(page, 'before', 'id,value\n001,old', 'my-before.csv');
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await expect(page.locator('.notice')).not.toBeVisible();
+  await expect(page.locator('.source-card').first()).toContainText('1 records');
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await upload(page, 'after', 'id,value\n001,new');
+  await expect(page.locator('.source-card').last()).toContainText('1 records');
+  // Remove the sample's now-invalid pairs, then use the normal explicit mapping flow.
+  while (await page.getByLabel('Remove column pair 1', { exact: true }).count()) {
+    await page.getByLabel('Remove column pair 1', { exact: true }).click();
+  }
+  await page.getByRole('button', { name: '+ Add column pair' }).click();
+  await page.getByLabel('Role for column pair 1').selectOption('key');
+  await page.getByRole('button', { name: '+ Add column pair' }).click();
+  await compare(page);
+  await expect(page.locator('.stat-changed .stat-value')).toHaveText('1');
+  await expect(page.locator('.sample-guide')).toHaveCount(0);
+  await expect(page.locator('.notice')).not.toContainText('Synthetic sample');
+});
+
+for (const action of ['parse', 'compare'] as const) {
+  test(`changing a rule during sample ${action} cannot publish a stale sample guide`, async ({ page }) => {
+    await page.addInitScript((delayedAction) => {
+      const original = Worker.prototype.postMessage;
+      Worker.prototype.postMessage = function (message: unknown): void {
+        const request = message as { action?: string };
+        if (request.action === delayedAction) window.setTimeout(() => original.call(this, message), 500);
+        else original.call(this, message);
+      };
+    }, action);
+    await page.reload();
+    await page.getByRole('button', { name: 'Try a sample comparison' }).click();
+    if (action === 'compare') await expect(page.locator('.notice')).toContainText('Comparing records');
+    else await expect(page.locator('.source-card').first()).toContainText('Reading your records');
+    await page.getByLabel('Ignore letter case').check();
+    await expect(page.getByRole('button', { name: 'Try a sample comparison' })).toBeEnabled();
+    await expect(page.locator('.sample-guide')).toHaveCount(0);
+    await expect(page.getByText('Comparison complete', { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel('Ignore letter case')).toBeChecked();
+  });
+}
+
 test('downloads preserve complete evidence and source hashes, including BOM', async ({ page }) => {
   const before = '\uFEFFid,value\r\n001,old\r\n002,same\r\n';
   const after = 'id,value\n002,same\n001,new\n003,added';

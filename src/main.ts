@@ -66,6 +66,7 @@ interface SourceState {
 
 let mappings: ColumnMapping[] = [];
 let comparison: Comparison | null = null;
+let sampleComparison: Comparison | null = null;
 let stale = false;
 let revision = 0;
 let comparing = false;
@@ -104,7 +105,7 @@ introCopy.append(element('p', 'eyebrow', 'A little certainty for your next step'
 introCopy.append(element('p', 'intro-description', 'See what changed, what disappeared, and what needs a closer look. Compare CSV files by the records inside them.'));
 const introAction = element('div', 'intro-action');
 const demoButton = button('Try a sample comparison', 'button button-dark', () => { void loadDemo(); });
-introAction.append(demoButton, element('span', 'small muted', 'No files handy? Use our fictional customer list.'));
+introAction.append(demoButton, element('span', 'small muted', 'One click: compare fictional customer exports.'));
 intro.append(introCopy, introAction);
 
 const privacy = element('div', 'privacy-strip');
@@ -472,18 +473,30 @@ function announce(message: string, isError = false): void {
 
 function invalidate(): void {
   revision += 1;
+  clearSampleGuide();
   if (comparison && !stale) { stale = true; renderResults(); }
 }
 
-async function compare(scroll = true): Promise<void> {
-  if (!before.table || !after.table || !validMappings()) { announce('Choose at least one key and use each column only once.', true); return; }
+function clearSampleGuide(): void {
+  if (sampleComparison) notice.hidden = true;
+  sampleComparison = null;
+  resultBody.querySelector('.sample-guide')?.remove();
+}
+
+function scrollToResults(): void {
+  resultsSection.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+}
+
+async function compare(scroll = true): Promise<boolean> {
+  clearSampleGuide();
+  if (!before.table || !after.table || !validMappings()) { announce('Choose at least one key and use each column only once.', true); return false; }
   const currentRevision = revision;
   comparing = true;
   announce('Comparing records on your device…');
   updateControls();
   try {
     const result = await runComparison(before.table, after.table, mappings.map((mapping) => ({ ...mapping })), options());
-    if (currentRevision !== revision) { announce('Your inputs changed while comparison was running. Compare again to refresh the results.'); return; }
+    if (currentRevision !== revision) { announce('Your inputs changed while comparison was running. Compare again to refresh the results.'); return false; }
     comparison = result;
     stale = false;
     filter = 'all';
@@ -491,29 +504,40 @@ async function compare(scroll = true): Promise<void> {
     page = 0;
     renderResults();
     announce(`Comparison complete. ${formatNumber(result.rows.length)} record groups reviewed.`);
-    if (scroll) resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } catch (error) { if (currentRevision === revision) announce(errorMessage(error), true); }
+    if (scroll) scrollToResults();
+    return true;
+  } catch (error) { if (currentRevision === revision) announce(errorMessage(error), true); return false; }
   finally { comparing = false; updateControls(); }
 }
 
 async function loadDemo(): Promise<void> {
   reset();
   const generation = demoGeneration;
+  const beforeRevision = revision;
   await loadSource(before, demoBefore);
-  if (generation !== demoGeneration) return;
+  if (generation !== demoGeneration || revision !== beforeRevision + 1) return;
+  const afterRevision = revision;
   await loadSource(after, demoAfter);
-  if (generation !== demoGeneration) return;
+  if (generation !== demoGeneration || revision !== afterRevision + 1) return;
   if (before.table && after.table) {
     mappings = demoMappings.map((mapping) => ({ ...mapping }));
     renderMappings();
-    await compare(false);
-    if (generation === demoGeneration) announce('Sample loaded: fictional customers, reordered rows, renamed columns, and blank or duplicate keys that need review.');
+    const sampleRevision = revision;
+    const completed = await compare(false);
+    if (completed && generation === demoGeneration && revision === sampleRevision) {
+      sampleComparison = comparison;
+      renderResults();
+      announce('Synthetic sample complete. Explore exact changes, unchanged records, and keys that need review.');
+      resultBody.querySelector<HTMLElement>('#sample-guide-heading')?.focus({ preventScroll: true });
+      scrollToResults();
+    }
   }
 }
 
 function cancel(): void {
   demoGeneration += 1;
   revision += 1;
+  clearSampleGuide();
   cancelWork();
   for (const state of [before, after]) {
     state.version += 1;
@@ -530,6 +554,7 @@ function reset(): void {
   window.clearTimeout(searchTimeout);
   cancelWork();
   revision += 1;
+  clearSampleGuide();
   comparing = false;
   for (const state of [before, after]) {
     state.version += 1;
@@ -602,6 +627,7 @@ function renderResults(): void {
     return;
   }
   const result = comparison;
+  if (sampleComparison === result && !stale) resultBody.append(renderSampleGuide(result));
   if (stale) {
     const warning = element('div', 'stale-warning');
     warning.setAttribute('role', 'status');
@@ -679,6 +705,35 @@ function renderResults(): void {
   evidence.append(element('p', 'small muted', 'Reports include the original values, column mappings, rules, source line references, and file fingerprints. Changes CSV excludes unchanged groups. Recipes contain rules and mappings only.'));
   details.append(evidence);
   resultBody.append(details);
+}
+
+function renderSampleGuide(result: Comparison): HTMLElement {
+  const guide = element('aside', 'sample-guide');
+  guide.setAttribute('aria-labelledby', 'sample-guide-heading');
+  const header = element('div', 'sample-guide-header');
+  const heading = element('h3', '', 'Start here: a fictional customer list');
+  heading.id = 'sample-guide-heading';
+  heading.tabIndex = -1;
+  const dismiss = button('Dismiss guide', 'button button-small button-quiet', () => {
+    clearSampleGuide();
+    const resultHeading = document.getElementById('results-heading');
+    if (resultHeading) { resultHeading.tabIndex = -1; resultHeading.focus({ preventScroll: true }); }
+  });
+  header.append(heading, dismiss);
+  guide.append(header, element('p', 'small', 'Synthetic sample. No customer data. Counts are key groups, not individual source rows.'));
+  const steps = element('div', 'sample-guide-steps');
+  const topics: [RowStatus, string, string, string][] = [
+    ['changed', 'Spot the exact change', 'Juniper & Co. changed from Starter to Team, and 45.00 to 60.00. Expand its record to inspect the original values.', `See ${result.counts.changed} changed groups`],
+    ['unchanged', 'Ignore the reshuffle', 'Northstar moved rows, but its selected values match. The last_seen column is excluded from this sample.', `See ${result.counts.unchanged} unchanged groups`],
+    ['conflict', 'Keep uncertain matches visible', 'Duplicate ID 00113 keeps every original row. Blank IDs stay separate because they cannot reliably identify the same customer.', `Review ${result.counts.conflict} ambiguous groups`],
+  ];
+  for (const [kind, title, description, action] of topics) {
+    const step = element('div', 'sample-guide-step');
+    step.append(element('h4', '', title), element('p', 'small', description), button(action, 'button button-small button-outline', () => setFilter(kind)));
+    steps.append(step);
+  }
+  guide.append(steps);
+  return guide;
 }
 
 function setFilter(value: RowStatus | 'all'): void {

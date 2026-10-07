@@ -23,8 +23,8 @@ I'd especially value feedback from people comparing inventory, customer or opera
 ## A 45-second demo
 
 1. Open `row-witness.html` with the network disabled.
-2. Choose **Try a sample comparison** to load the synthetic customer exports.
-3. Show a changed value, an added record and a removed record.
+2. Choose **Try a sample comparison** to load and compare the synthetic customer exports in one click. The result guide explains what to inspect.
+3. Choose **See 4 changed groups** and expand Juniper & Co. to show the exact plan and price change. Point out the added and removed totals.
 4. Show a duplicate-key Needs review group with all original records.
 5. Point out the selected mappings and excluded columns.
 6. Download the HTML report, open it, and show that it contains the complete results and source references.

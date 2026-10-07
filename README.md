@@ -10,14 +10,16 @@ Row Witness is a small, open-source application that fits in one HTML file. It c
 
 ## Try it
 
-1. Download **[row-witness.html from v0.1.0](https://github.com/Buzburg/row-witness/releases/download/v0.1.0/row-witness.html)**, or build it from source below.
+1. Download **[row-witness.html from v0.2.0](https://github.com/Buzburg/row-witness/releases/download/v0.2.0/row-witness.html)**, or build it from source below.
 2. Open the downloaded file in a modern browser.
-3. Choose **Try a sample comparison** to compare realistic synthetic customer exports, or select your own before and after files.
-4. Set the key and comparison columns, run the comparison, and export the results.
+3. Choose **Try a sample comparison**. One click loads fictional customer exports, compares them, and takes you to a short guide explaining the results. Explore an exact change, reordered records, and keys that need review.
+4. For your own data, select before and after files, set the key and comparison columns, run the comparison, and export the results.
 
 The downloaded application works offline, including comparison and report generation. You can keep a copy with your files or host the same static file on your own server. Your browser does not need to upload source files to run it.
 
 Want files to experiment with? The [synthetic customer exports and recipe](examples/) reproduce the built-in sample: 4 changed, 2 added, 2 removed, 3 Needs review groups, and 6 unchanged groups.
+
+The sample guide can be dismissed. It disappears when you change an input, rule, or mapping, clear the session, or run a new comparison. Choosing the sample explicitly replaces the current in-memory session; it never opens or changes files on your device. Nothing runs automatically when you open the app.
 
 ## What it handles
 
