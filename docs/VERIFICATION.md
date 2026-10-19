@@ -1,5 +1,19 @@
 # Release verification
 
+## Public launch verification — October 19, 2026
+
+Rechecked on Linux with Node.js 22.23.3 and the locked Playwright 1.58.2 dependencies:
+
+- Clean `npm ci --ignore-scripts`, TypeScript checking, all 56 unit tests, and the standalone build passed.
+- All 36 browser checks passed across Chromium and Firefox, including offline file use, complete report downloads, synthetic-data handling, responsive layouts and automated accessibility checks.
+- The independent parser check passed all 160 deterministic fixtures against Python’s CSV reader. Synthetic comparison benchmarks also verified full record accounting.
+- `npm audit` reported no known vulnerabilities in the locked development dependencies at this check. This is time-specific, not a future guarantee.
+- The v0.2.1 public-launch changes leave the comparison engine and styles unchanged. The release workflow repeats checks, publishes the downloadable HTML and checksum, and deploys those same app bytes to GitHub Pages.
+
+See the [release workflow](../.github/workflows/release.yml) and [current workflow results](https://github.com/Buzburg/row-witness/actions) for the exact published revision and deployment status.
+
+## Earlier verification
+
 Local verification performed on 2026-10-06 with synthetic fixtures. This documents tested behavior, not a guarantee for all files, browsers or devices.
 
 - TypeScript strict mode, unchecked-index checks and exact optional properties pass.

@@ -10,7 +10,11 @@ Row Witness is a small, open-source application that fits in one HTML file. It c
 
 ## Try it
 
-1. Download **[row-witness.html from v0.2.0](https://github.com/Buzburg/row-witness/releases/download/v0.2.0/row-witness.html)**, or build it from source below.
+**[Open Row Witness in your browser](https://buzburg.github.io/row-witness/)** · **[Download the offline app](https://github.com/Buzburg/row-witness/releases/latest)**
+
+The browser demo loads the same standalone app from GitHub Pages. Comparison runs on your device; source files are not uploaded. To use it without visiting a website, download the HTML file.
+
+1. Download **[row-witness.html from v0.2.1](https://github.com/Buzburg/row-witness/releases/download/v0.2.1/row-witness.html)**, or build it from source below.
 2. Open the downloaded file in a modern browser.
 3. Choose **Try a sample comparison**. One click loads fictional customer exports, compares them, and takes you to a short guide explaining the results. Explore an exact change, reordered records, and keys that need review.
 4. For your own data, select before and after files, set the key and comparison columns, run the comparison, and export the results.

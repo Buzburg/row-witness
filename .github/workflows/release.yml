@@ -18,7 +18,30 @@ jobs:
       - run: npm run check && npm test && npm run build
       - run: npx playwright install --with-deps chromium firefox
       - run: npm run test:e2e
+      - name: Prepare the identical app for GitHub Pages
+        run: |
+          mkdir -p pages
+          cp dist/row-witness.html pages/index.html
+          touch pages/.nojekyll
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: pages
       - name: Publish the verified standalone app
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" dist/row-witness.html dist/SHA256SUMS.txt --verify-tag --title "Row Witness $GITHUB_REF_NAME" --notes-file docs/RELEASE.md
+
+  pages:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Deploy the verified app
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

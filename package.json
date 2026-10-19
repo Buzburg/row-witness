@@ -1,6 +1,6 @@
 {
   "name": "row-witness",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Find what changed between two CSV exports. One HTML file. Entirely offline.",
   "type": "module",

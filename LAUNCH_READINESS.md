@@ -1,28 +1,11 @@
-# Launch readiness — row-witness
+# Launch readiness — Row Witness
 
-Reviewed October 17, 2026. Visibility has not been changed by this review.
+Reviewed October 19, 2026 for the v0.2.1 public launch.
 
-**Recommendation: Launch first.**
+Row Witness is a focused, complete offline CSV comparison app with a guided synthetic example, standalone downloads and documented limits. The comparison engine and existing appearance are unchanged in this release.
 
-A clear offline CSV comparison product with a standalone download. 56 unit tests and 18 local Chromium browser tests passed; types, build and npm audit passed. Current baseline CI also checks Firefox.
+Local release checks passed: clean dependency installation, strict TypeScript checking, 56 unit tests, 36 Chromium/Firefox browser checks, a standalone build, and 160 independent parser fixtures. The locked development dependency audit reported no known vulnerabilities at the time of verification.
 
-## Scope and limits
+The public release offers an [online demo](https://buzburg.github.io/row-witness/) and an [offline download](https://github.com/Buzburg/row-witness/releases/latest). The release workflow tests the build before publishing and deploys the identical HTML app to GitHub Pages. See [verification details](docs/VERIFICATION.md) and [hosted workflow results](https://github.com/Buzburg/row-witness/actions) for evidence and deployment status.
 
-No hosted service required. Keep claims limited to supported CSV comparison; no guarantee for every encoding or dataset.
-
-## Evidence
-
-Baseline reviewed: `b3aae023e9703bdaf38b2f00a6a3c44e955665b0`. Documentation and focused corrections may follow this baseline; check CI on the final commit before releasing.
-
-Local checks used Linux x86-64, Python 3.12.14, Node 26.8.1, the installed Rust toolchain, and Mojo 1.1.0 where relevant. Native/Python/HTTP coverage is distinguished; a passing subset is not a full product certification.
-
-- `types`: PASS.
-- `audit`: PASS.
-- `unit`: PASS — ℹ tests 56.
-- `browser-local`: PASS — 18 passed (13.5s).
-- `build`: PASS.
-- Baseline hosted workflow [Release](https://github.com/Buzburg/row-witness/actions/runs/37566355264): success.
-- Baseline hosted workflow [Verify](https://github.com/Buzburg/row-witness/actions/runs/37566355232): success.
-- Baseline hosted workflow [Verify](https://github.com/Buzburg/row-witness/actions/runs/37566353906): success.
-
-Detailed command logs and setup diagnostics are retained in the private local launch-review workspace. Browser checks used installed Chromium; matching baseline CI includes the configured browser matrix. Downloading the pinned browser bundle timed out locally, so this review does not claim a new local Firefox run.
+Claims remain limited to supported UTF-8 CSV/TSV comparison. Every optional CSV dialect, browser extension, spreadsheet importer and device has not been verified. Real customer files were not used. Popularity and commercial adoption have not been measured.

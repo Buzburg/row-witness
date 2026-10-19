@@ -1,16 +1,16 @@
-# Row Witness v0.2.0
+# Row Witness v0.2.1 — public launch
 
-Find what changed between two CSV exports, entirely on your device.
+Compare two CSV exports, understand every change, and keep the source files on your device.
 
-The built-in sample now includes a short results guide: inspect four changed groups, see six unchanged groups despite reordered rows, and review three ambiguous groups. Guidance disappears when inputs or comparison rules change. Keyboard focus and reduced-motion preferences are respected.
+**[Open the browser demo](https://buzburg.github.io/row-witness/)** or download **row-witness.html** below and open it in Chrome, Edge or Firefox. Choose **Try a sample comparison** for a guided example. No installation or account required.
 
-Download **row-witness.html** and open it in a current Chrome, Edge or Firefox browser. No installation or server is needed. Try the built-in synthetic example first.
+- Match records using one or more keys, even when columns have different names.
+- See added, removed and changed records. Duplicate and blank keys keep every original row in a Needs review group.
+- Export complete HTML reports, changes CSV, exact JSON evidence and reusable comparison recipes.
+- The downloaded app works offline. Comparison needs no upload endpoint, AI service, telemetry or subscription.
 
-- Map differently named columns and match records with one or more keys.
-- See added, removed, changed and unchanged records, with duplicate or blank keys in Needs review.
-- Export a complete HTML report, spreadsheet-hardened changes CSV, exact JSON evidence and reusable data-free recipes.
-- No uploads, accounts, analytics or external resources. Works offline.
+This public-launch patch adds an online entry point, automated deployment of the verified app, and current release guidance. The comparison engine and existing visual design are unchanged.
 
-UTF-8 CSV/TSV only, with 10 MiB, 100,000 records, 200 columns and 2 million cells per input. Exact text comparison by default. This release does not support Excel workbooks or fuzzy matching.
+UTF-8 CSV/TSV only: up to 10 MiB, 100,000 records, 200 columns and 2 million cells per input. Values compare as text by default. Excel workbooks, numeric tolerances and fuzzy matching are not supported. Reports include original values, including excluded fields; review before sharing.
 
-SHA256SUMS.txt records the app download's SHA-256 digest. Full test details and product limits are documented in the repository.
+The workflow checks TypeScript, all 56 unit tests and 36 Chromium/Firefox browser checks before publishing. SHA256SUMS.txt records the app download’s SHA-256 digest. The live demo serves the same app bytes under the filename index.html; loading that page contacts GitHub Pages, while file processing stays in your browser. Download the app for fully offline use.
